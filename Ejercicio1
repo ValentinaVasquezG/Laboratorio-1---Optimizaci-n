@@ -1,0 +1,54 @@
+import numpy as np
+from scipy.integrate import solve_ivp
+import matplotlib.pyplot as plt
+
+
+r0 = 2
+k = 0.5
+alpha = 1
+T = 10
+R0 = 1
+
+
+def dynamics(t, y):
+    R, lam = y
+
+    u = max(0, 1/(lam * k * (R**alpha + 1e-6)) - 1)
+
+    dRdt = r0 - k * (R**alpha) * u
+    dlamdt = lam * k * alpha * (R**(alpha-1)) * u
+    return [dRdt, -dlamdt]
+
+
+sol = solve_ivp(dynamics, [0, T], [R0, 1.0], t_eval=np.linspace(0, T, 200))
+
+t = sol.t
+R = sol.y[0]
+lam = sol.y[1]
+
+u_opt = np.maximum(0, 1/(lam * k * (R**alpha + 1e-6)) - 1)
+
+
+plt.figure(figsize=(6,4))
+plt.plot(t, R, label="R(t)")
+plt.xlabel("Tiempo")
+plt.ylabel("Recurso")
+plt.title("Evolución del recurso R(t)")
+plt.grid()
+plt.show()
+
+plt.figure(figsize=(6,4))
+plt.plot(t, lam, label="λ(t)", color="orange")
+plt.xlabel("Tiempo")
+plt.ylabel("λ(t)")
+plt.title("Variable adjunta λ(t)")
+plt.grid()
+plt.show()
+
+plt.figure(figsize=(6,4))
+plt.plot(t, u_opt, label="u*(t)", color="green")
+plt.xlabel("Tiempo")
+plt.ylabel("Control óptimo")
+plt.title("Control óptimo u*(t)")
+plt.grid()
+plt.show()
